@@ -2,6 +2,7 @@ package base62
 
 import (
 	"errors"
+	"math"
 	"strings"
 	"testing"
 )
@@ -41,6 +42,17 @@ func TestDecode(t *testing.T) {
 	if got, err := Decode("00000z"); err != nil || got != 61 {
 		t.Errorf("Decode(\"00000z\") = %d, %v; want 61, nil", got, err)
 	}
+
+	const code = "LygHa16AHYF"
+	want := uint64(math.MaxUint64)
+
+	got, err := Decode(code)
+	if err != nil {
+		t.Fatalf("Decode(%q): %v", code, err)
+	}
+	if got != want {
+		t.Errorf("Decode(%q) = %d, want %d", code, got, want)
+	}
 }
 
 func TestDecodeErrors(t *testing.T) {
@@ -49,6 +61,7 @@ func TestDecodeErrors(t *testing.T) {
 		"ab-cd":                 ErrInvalidCharacter,
 		"ab_cd":                 ErrInvalidCharacter,
 		"hello world":           ErrInvalidCharacter,
+		strings.Repeat("z", 11): ErrOverflow,
 		strings.Repeat("z", 12): ErrOverflow,
 	}
 	for in, want := range tests {

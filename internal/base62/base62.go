@@ -2,6 +2,7 @@ package base62
 
 import (
 	"errors"
+	"math"
 	"slices"
 	"strings"
 )
@@ -70,7 +71,17 @@ func Decode(s string) (uint64, error) {
 	var v uint64 = 0
 	for _, r := range s {
 		idx := strings.IndexRune(codecAlphabet, r)
-		v = v*62 + uint64(idx)
+
+		digit := uint64(idx)
+		if efflen == 11 {
+			const maxPrefix = math.MaxUint64 / 62
+			const maxDigit = math.MaxUint64 % 62
+
+			if v > maxPrefix || (v == maxPrefix && digit > maxDigit) {
+				return 0, ErrOverflow
+			}
+		}
+		v = v*62 + digit
 	}
 
 	return v, nil

@@ -1,15 +1,7 @@
 # Linkforge
 
-A simple URL shortener with click analytics.
+A Go URL shortener with click analytics.
 
-## Building
-To build the project, run:
-```bash
-go build ./...
-```
+Build: `go build ./...`
 
-## Running
-To run the demo application:
-```bash
-go run ./cmd/linkforge <url1> <url2> ...
-```
+Run: `go run ./cmd/linkforge https://example.com`

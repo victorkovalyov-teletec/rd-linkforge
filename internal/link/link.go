@@ -22,21 +22,16 @@ var (
 
 // New builds a link, validating the target address.
 func New(id uint64, target string) (Link, error) {
-
-	// check empty str
 	if target == "" {
 		return Link{}, ErrEmptyTarget
 	}
 
-	// check for http scheme
-	// we can define all strings in map or array, but this is out of scope for this task...
 	if !strings.HasPrefix(target, "http://") {
 		if !strings.HasPrefix(target, "https://") {
 			return Link{}, ErrUnsupportedScheme
 		}
 	}
 
-	// create obj
 	return Link{
 		ID:        id,
 		Code:      base62.EncodeWidth(id, 6),

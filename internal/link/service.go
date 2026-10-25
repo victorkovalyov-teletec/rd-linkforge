@@ -112,12 +112,18 @@ func (s *Service) Shorten(ctx context.Context, sh ShortenRequest) (Link, error) 
 
 func (s *Service) Resolve(ctx context.Context, code string) (Link, error) {
 	var link, err = s.store.ByCode(ctx, code)
+
+	if err != nil {
+		return Link{}, err
+	}
+
 	if !link.ExpiresAt.IsZero() {
 		if !s.now().Before(link.ExpiresAt) {
-			return link, ErrExpired
+			return Link{}, ErrExpired
 		}
 	}
-	return link, err
+
+	return link, nil
 }
 
 func (s *Service) List(ctx context.Context, owner string, page Page) ([]Link, error) {

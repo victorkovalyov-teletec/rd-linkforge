@@ -49,7 +49,9 @@ func (s *Service) Shorten(ctx context.Context, sh ShortenRequest) (Link, error) 
 		return Link{}, err
 	}
 
-	if !sh.ExpiresAt.IsZero() && !sh.ExpiresAt.After(s.now()) {
+	var now = s.now().UTC()
+
+	if !sh.ExpiresAt.IsZero() && !sh.ExpiresAt.After(now) {
 		return Link{}, ErrInvalidExpiry
 	}
 
@@ -86,7 +88,7 @@ func (s *Service) Shorten(ctx context.Context, sh ShortenRequest) (Link, error) 
 			// empty code means we need to generate it
 			code = base62.EncodeWidth(id, 6)
 		}
-		link, e = s.store.Create(ctx, Link{ID: id, Target: sh.Target, OwnerID: sh.OwnerID, ExpiresAt: sh.ExpiresAt, CreatedAt: s.now(), Code: code})
+		link, e = s.store.Create(ctx, Link{ID: id, Target: sh.Target, OwnerID: sh.OwnerID, ExpiresAt: sh.ExpiresAt.UTC(), CreatedAt: now, Code: code})
 		if e != nil {
 			if errors.Is(e, ErrAliasTaken) {
 				if sh.Alias != "" || try == 0 {

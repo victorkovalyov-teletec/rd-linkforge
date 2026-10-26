@@ -33,6 +33,21 @@ func Encode(v uint64) string {
 	return string(res)
 }
 
+func encodeRecursiveHelper(v uint64, b *strings.Builder) {
+	if v >= 62 {
+		encodeRecursiveHelper(v/62, b)
+	}
+
+	b.WriteByte(codecAlphabet[v%62])
+}
+
+func EncodeRecursive(v uint64) string {
+	var bld strings.Builder
+	bld.Grow(12)
+	encodeRecursiveHelper(v, &bld)
+	return bld.String()
+}
+
 // EncodeWidth does the same but left-pads with zeroes to at least width characters. The value itself is never truncated.
 func EncodeWidth(v uint64, width int) string {
 	s := Encode(v)

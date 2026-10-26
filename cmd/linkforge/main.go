@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
@@ -9,30 +10,28 @@ import (
 )
 
 func main() {
+	ctx := context.Background()
+
 	s := store.New()
-	var nextID uint64 = 1
+
+	srv := link.NewService(s)
 
 	for _, target := range os.Args[1:] {
-		l, err := link.New(nextID, target)
+		_, err := srv.Shorten(ctx, link.ShortenRequest{
+			Target:  target,
+			OwnerID: "demo",
+		})
+
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Error processing %s: %v\n", target, err)
 			continue
 		}
-
-		err = store.Add(s, l)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Error adding to store: %v\n", err)
-			continue
-		}
-		nextID++
 	}
 
-	links := store.All(s)
+	links := s.All()
 	for _, l := range links {
-		fmt.Printf("%s  %s\n", l.Code, l.Target)
+		fmt.Printf("%s %s\n", l.Code, l.Target)
 	}
 
-	if len(links) > 0 {
-		fmt.Printf("\nTotal: %d\n", store.Count(s))
-	}
+	fmt.Printf("\nTotal: %d\n", s.Count())
 }
